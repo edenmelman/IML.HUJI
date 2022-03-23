@@ -2,29 +2,75 @@ from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
+
 pio.templates.default = "simple_white"
 
 
 def test_univariate_gaussian():
     # Question 1 - Draw samples and print fitted model
-    raise NotImplementedError()
+    uni_gaussian = UnivariateGaussian()
+    X = np.random.normal(10, 1, 1000)
+    uni_gaussian.fit(X)
+    print(uni_gaussian.mu_, uni_gaussian.var_)
+    # TODO output format should be with ()?
 
     # Question 2 - Empirically showing sample mean is consistent
-    raise NotImplementedError()
+    sample_sizes = np.arange(10, 1001, 10)
+    estimated_exp = np.zeros((100,))
+    for i in range(0, 100):
+        estimated_exp[i] = uni_gaussian.fit(X[:sample_sizes[i]]).mu_
+    fig_1 = go.Figure(
+        go.Scatter(x=sample_sizes,
+                   y=np.abs(estimated_exp - 10)))
+    fig_1.update_layout(
+        title_text="Estimated Expectation As a Function of Sample Size",
+        xaxis_title="Sample Size",
+        yaxis_title="ABS distance between"
+                    " estimated and real Expectation")
+    fig_1.show()
 
     # Question 3 - Plotting Empirical PDF of fitted model
-    raise NotImplementedError()
+    fig_2 = go.Figure(
+        # at this point, uni_gaussian is fitted based the full sample-
+        # size (1000)
+        go.Scatter(x=X, y=uni_gaussian.pdf(X), mode='markers'))
+    fig_2.update_layout(title="PDF per sample value",
+                        xaxis_title="Sample Value",
+                        yaxis_title="PDF Value")
+    fig_2.show()
+    # TODO  not + add formal answer to pdf question on what we expect
 
 
 def test_multivariate_gaussian():
     # Question 4 - Draw samples and print fitted model
-    raise NotImplementedError()
+    multi_gaussian = MultivariateGaussian()
+    cov = np.array([[1, 0.2, 0, 0.5], [0.2, 2, 0, 0], [0, 0, 1, 0],
+                    [0.5, 0, 0, 1]])
+    mu = np.array([0, 0, 4, 0])
+    X = np.random.multivariate_normal(mu, cov, 1000)
+    multi_gaussian.fit(X)
+    print(multi_gaussian.mu_)
+    print(multi_gaussian.cov_)
+    # TODO why sep=" " doesn't work
 
     # Question 5 - Likelihood evaluation
-    raise NotImplementedError()
+    f1 = np.linspace(-10, 10, 200)
+    f3 = np.linspace(-10, 10, 200)
+    likelihood = np.zeros((200, 200))
+    for i in range(200):
+        for j in range(200):
+            mu = np.array([f1[i], 0, f3[j], 0])
+            likelihood[i][j] = multi_gaussian.log_likelihood(mu, cov, X)
+    go.Figure(go.Heatmap(x=f3, y=f1, z=likelihood),
+              layout=go.Layout(title='Likelihood Evaluation')).show()
+    # layout=go.Layout(title='Likelihood Evaluation',
+    #                  xaxis="f3 Values", yaxis="f1 Values",a
+    #                  coloraxis="Log Likelihood")).show()
 
-    # Question 6 - Maximum likelihood
-    raise NotImplementedError()
+    # TODO add names
+
+    # # Question 6 - Maximum likelihood
+    # raise NotImplementedError()
 
 
 if __name__ == '__main__':
