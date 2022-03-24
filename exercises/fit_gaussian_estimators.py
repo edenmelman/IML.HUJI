@@ -11,8 +11,7 @@ def test_univariate_gaussian():
     uni_gaussian = UnivariateGaussian()
     X = np.random.normal(10, 1, 1000)
     uni_gaussian.fit(X)
-    print(uni_gaussian.mu_, uni_gaussian.var_)
-    # TODO output format should be with ()?
+    print(uni_gaussian.mu_, uni_gaussian.var_, sep=",")
 
     # Question 2 - Empirically showing sample mean is consistent
     sample_sizes = np.arange(10, 1001, 10)
@@ -38,7 +37,6 @@ def test_univariate_gaussian():
                         xaxis_title="Sample Value",
                         yaxis_title="PDF Value")
     fig_2.show()
-    # TODO  not + add formal answer to pdf question on what we expect
 
 
 def test_multivariate_gaussian():
@@ -51,7 +49,6 @@ def test_multivariate_gaussian():
     multi_gaussian.fit(X)
     print(multi_gaussian.mu_)
     print(multi_gaussian.cov_)
-    # TODO why sep=" " doesn't work
 
     # Question 5 - Likelihood evaluation
     f1 = np.linspace(-10, 10, 200)
@@ -61,16 +58,21 @@ def test_multivariate_gaussian():
         for j in range(200):
             mu = np.array([f1[i], 0, f3[j], 0])
             likelihood[i][j] = multi_gaussian.log_likelihood(mu, cov, X)
-    go.Figure(go.Heatmap(x=f3, y=f1, z=likelihood),
-              layout=go.Layout(title='Likelihood Evaluation')).show()
-    # layout=go.Layout(title='Likelihood Evaluation',
-    #                  xaxis="f3 Values", yaxis="f1 Values",a
-    #                  coloraxis="Log Likelihood")).show()
+    fig_5 = go.Figure(go.Heatmap(x=f3, y=f1, z=likelihood),
+                      layout=go.Layout(
+                          title='Log Likelihood Evaluation'))
+    fig_5.update_layout(xaxis_title="f3 Values",
+                        yaxis_title="f1 values")
+    fig_5.show()
 
-    # TODO add names
-
-    # # Question 6 - Maximum likelihood
-    # raise NotImplementedError()
+    # Question 6 - Maximum likelihood
+    max_val_ind = np.argmax(likelihood)
+    max_val_x = max_val_ind % likelihood.shape[1]
+    max_val_y = max_val_ind // likelihood.shape[1]
+    max_f1_rounded = round(f1[max_val_y], 3)
+    max_f3_rounded = round(f3[max_val_x], 3)
+    print("max log likelihood model is ({}, {})".format(max_f1_rounded,
+                                                        max_f3_rounded))
 
 
 if __name__ == '__main__':

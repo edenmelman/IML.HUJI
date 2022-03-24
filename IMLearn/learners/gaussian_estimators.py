@@ -72,7 +72,8 @@ class UnivariateGaussian:
         Returns
         -------
         pdfs: ndarray of shape (n_samples, )
-            Calculated values of given samples for PDF function of N(mu_, var_)
+            Calculated values of given samples for PDF functio
+            n of N(mu_, var_)
 
         Raises
         ------
@@ -80,14 +81,16 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError(
-                "Estimator must first be fitted before calling `pdf` function")
-        divisor = (2 * np.pi * self.var_) ** (self.mu_ / 2)
-        return np.exp(-(X - self.mu_) ** 2 / (2 * self.var_)) / divisor
+                "Estimator must first be fitted before calling"
+                " `pdf` function")
+        divisor = (2 * np.pi * self.var_) ** (1 / 2)
+        return np.exp((X - self.mu_) ** 2 / -(2 * self.var_)) / divisor
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
         """
-        Calculate the log-likelihood of the data under a specified Gaussian model
+        Calculate the log-likelihood of the data under a
+         specified Gaussian model
 
         Parameters
         ----------
@@ -107,7 +110,6 @@ class UnivariateGaussian:
         part_a = (-m / 2) * (np.log(2 * np.pi * sigma))
         part_b = (-1 / 2 * sigma) * (((X - mu) ** 2).sum())
         return part_a + part_b
-        # TODO check if it's sigma or var
 
 
 class MultivariateGaussian:
@@ -219,14 +221,8 @@ class MultivariateGaussian:
         part_a = (m * d / 2) * np.log(2 * np.pi)
         part_b = (m / 2) * np.log(np.linalg.det(cov))
         cov_inv = np.linalg.inv(cov)
-        result_matrix = np.dot(np.transpose(X - mu),
-                               np.dot(cov_inv, (X - mu)))
+        result_matrix = np.dot((X - mu),
+                               np.dot(cov_inv, np.transpose(X - mu)))
         part_c = np.trace(result_matrix)  # equivalent to:
-        # sum of (Xi - mu * cov_inv * (Xi - mu)t)
-
-        # for i in range(m):
-        #     v = X[i] - mu
-        #     part_c += np.dot(v, np.dot(cov_inv, v))
-        # TODO change to the shortcut
-        # check where should I use the logdet
+        # sum 0 to (m-1) of (Xi - mu * cov_inv * transpose(Xi - mu))
         return - part_a - part_b - (1 / 2) * part_c
