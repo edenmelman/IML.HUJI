@@ -226,3 +226,4 @@ class MultivariateGaussian:
         part_c = np.trace(result_matrix)  # equivalent to:
         # sum 0 to (m-1) of (Xi - mu * cov_inv * transpose(Xi - mu))
         return - part_a - part_b - (1 / 2) * part_c
+
