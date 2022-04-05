@@ -77,7 +77,6 @@ class LinearRegression (BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-
         if self.include_intercept_:
             X = np.insert(X, 0, [1],
                           axis=1)  # weights contain intercept

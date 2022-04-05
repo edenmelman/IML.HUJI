@@ -7,7 +7,7 @@ from IMLearn import BaseEstimator
 from IMLearn.learners.regressors import LinearRegression
 
 
-class PolynomialFitting(LinearRegression):
+class PolynomialFitting(BaseEstimator):
     """
     Polynomial Fitting using Least Squares estimation
     """
@@ -20,7 +20,7 @@ class PolynomialFitting(LinearRegression):
         k : int
             Degree of polynomial to fit
         """
-        super().__init__(include_intercept=False)
+        self.lin_reg = LinearRegression(include_intercept=False)
         self._k = k
 
 
@@ -36,8 +36,9 @@ class PolynomialFitting(LinearRegression):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
+
         adjusted_x = self.__transform(X)
-        super()._fit(adjusted_x, y)
+        self.lin_reg._fit(adjusted_x, y)
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -54,7 +55,7 @@ class PolynomialFitting(LinearRegression):
             Predicted responses of given samples
         """
         adjusted_x = self.__transform(X)
-        return super()._predict(adjusted_x)
+        return self.lin_reg._predict(adjusted_x)
 
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -75,7 +76,7 @@ class PolynomialFitting(LinearRegression):
             Performance under MSE loss function
         """
         adjusted_x = self.__transform(X)
-        return super()._loss(adjusted_x, y)
+        return self.lin_reg._loss(adjusted_x, y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """

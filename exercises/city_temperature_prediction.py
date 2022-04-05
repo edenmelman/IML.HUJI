@@ -42,6 +42,7 @@ def load_data(filename: str) -> pd.DataFrame:
 
 if __name__ == '__main__':
     np.random.seed(0)
+
     # Question 1 - Load and preprocessing of city temperature dataset
     df = load_data("C:/IML.HUJI/datasets/City_Temperature.csv")
 
@@ -50,13 +51,13 @@ if __name__ == '__main__':
     fig_1 = px.scatter(israel_subset, x="DayOfYear", y="Temp",
                        color='Year')
     fig_1.update_layout(title='Temprature as function of Day of Year')
-    #fig_1.show()
+    fig_1.show()
 
     israel_month_temp_std = israel_subset.groupby(['Month']).std()
     israel_month_temp_std = israel_month_temp_std.reset_index()
     fig_2 = px.bar(israel_month_temp_std, x='Month', y='Temp')
     fig_2.update_layout(title='Temperature STD per Month')
-    #fig_2.show()
+    fig_2.show()
 
     # Question 3 - Exploring differences between countries
     temp_per_country_month = df.groupby(['Country', 'Month'],
@@ -65,22 +66,35 @@ if __name__ == '__main__':
     fig_3 = px.line(temp_per_country_month, x="Month", y="mean",
                     color='Country', error_y='std')
     fig_3.update_layout(title="Montly Avarage Temprature per Country")
-    #fig_3.show()
+    fig_3.show()
 
     # Question 4 - Fitting model for different values of `k`
     temp = israel_subset.pop('Temp')
     train_x, train_y, test_x, test_y = split_train_test(israel_subset, temp, 0.75)
-    polinom_degree = np.arange(1, 11)
-    losses = np.zeros((10,))
-    for i in range(10):
-        polifit_model = PolynomialFitting(polinom_degree[i])
+    loss_per_k = dict()
+    for k in range(11):
+        polifit_model = PolynomialFitting(k)
         polifit_model.fit(train_x['DayOfYear'].to_numpy(), train_y.to_numpy())
-        losses[i] = polifit_model.loss(test_x['DayOfYear'].to_numpy(), test_y.to_numpy())
-    fig_4 = px.bar(x=polinom_degree, y=losses)
+        loss_per_k[k] = round(polifit_model._loss(test_x['DayOfYear'].to_numpy(), test_y.to_numpy()),2)
+        print(f"Polinom Degree: {k}, Loss: {loss_per_k[k]}")
+
+    fig_4 = px.bar(x=loss_per_k.keys(), y=loss_per_k.values())
     fig_4.update_layout(title='Loss per Polinom Degree',
                         xaxis_title="Polinom Degree",
                         yaxis_title="Loss")
     fig_4.show()
 
     # Question 5 - Evaluating fitted model on different countries
-    # raise NotImplementedError()
+    final_polifit_model = PolynomialFitting(k = 5)
+    final_polifit_model.fit(israel_subset['DayOfYear'], temp)
+    error_per_country = dict()
+    for country in df.loc[df.Country != "Israel"].Country.unique():
+        country_test_set = df.loc[df.Country == country]
+        test_x = country_test_set.DayOfYear.to_numpy()
+        test_y = country_test_set.Temp.to_numpy()
+        error_per_country[country] = final_polifit_model._loss(test_x, test_y)
+    fig_5 = px.bar(x=error_per_country.keys(), y=error_per_country.values())
+    fig_5.update_layout(title='Loss Over Country',
+                        xaxis_title="Country",
+                        yaxis_title="Loss")
+    fig_5.show()
