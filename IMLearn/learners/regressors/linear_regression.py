@@ -81,7 +81,6 @@ class LinearRegression (BaseEstimator):
             X = np.insert(X, 0, [1],
                           axis=1)  # weights contain intercept
         return np.asarray(np.matmul(X, self.weights_)).flatten()
-    # TODO should I reshape?
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -102,7 +101,6 @@ class LinearRegression (BaseEstimator):
         """
         y_pred = self._predict(X)
         return mean_square_error(y, self._predict(X))
-        # TODO check if should handle not fitted yet situations
 
 if __name__ == '__main__':
     lin_reg = LinearRegression(include_intercept=False)

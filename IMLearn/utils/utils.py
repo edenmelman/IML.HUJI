@@ -34,8 +34,9 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
 
     """
 
+    seed = np.random.randint(200) # seed to be used in sample
     full_df = X.assign(response=y)
-    train_df = full_df.sample(frac=train_proportion)
+    train_df = full_df.sample(frac=train_proportion, random_state = seed)
     test_df = full_df.drop(train_df.index)
     train_y = train_df.pop('response')
     test_y = test_df.pop('response')

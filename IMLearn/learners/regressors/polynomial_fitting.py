@@ -11,7 +11,7 @@ class PolynomialFitting(BaseEstimator):
     """
     Polynomial Fitting using Least Squares estimation
     """
-    def __init__(self, k: int) -> None:
+    def __init__(self, k: int) -> PolynomialFitting:
         """
         Instantiate a polynomial fitting estimator
 
@@ -20,6 +20,7 @@ class PolynomialFitting(BaseEstimator):
         k : int
             Degree of polynomial to fit
         """
+        super().__init__()
         self.lin_reg = LinearRegression(include_intercept=False)
         self._k = k
 

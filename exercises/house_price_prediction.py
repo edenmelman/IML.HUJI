@@ -47,17 +47,15 @@ def load_data(filename: str):
 
     # add fields
     df['sqft-sqft15_living'] = df.apply(
-        lambda row: row.sqft_living - row.sqft_living15, axis=1)
+        lambda row: row.sqft_living/row.sqft_living15, axis=1)
     df['sqft-sqft15_lot'] = df.apply(
-        lambda row: row.sqft_lot - row.sqft_lot15, axis=1)
+        lambda row: row.sqft_lot/row.sqft_lot15, axis=1)
     df['house_age'] = df.apply(lambda row: row.date.year - row.yr_built,
                                axis=1)
     df = pd.get_dummies(df, columns=['zipcode'])
-    # TODO add zipcodes
 
     # remove fields
-    df = df.drop(columns=['id', 'lat', 'long', 'date', 'sqft_living15',
-                          'sqft_lot15'])
+    df = df.drop(columns=['id', 'lat', 'long', 'date'])
     response = df.pop('price')
     return df, response
 
@@ -89,7 +87,6 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series,
                 featureName, pc),
             xaxis_title=featureName,
             yaxis_title="price")
-        # TODO change to y.name?
         pio.write_image(fig,
                         output_path + "/{}.png".format(featureName))
 
@@ -106,7 +103,7 @@ if __name__ == '__main__':
     df, res = load_data("C:/IML.HUJI/datasets/house_prices.csv")
 
     # Question 2 - Feature evaluation with respect to response
-    # feature_evaluation(df, res, "C:/IML.HUJI/ex_temp")
+    feature_evaluation(df, res, "C:/IML.HUJI/ex_temp")
 
     # Question 3 - Split samples into training- and testing sets.
     train_x, train_y, test_x, test_y = split_train_test(df, res, 0.75)
@@ -129,7 +126,6 @@ if __name__ == '__main__':
     p = np.arange(10, 101)
 
     for i in range(0, len(p)):
-        print("entered")
         losses = np.zeros((10,))
         for j in range(0, 10):
             partial_training_set = training_set.sample(
@@ -138,7 +134,7 @@ if __name__ == '__main__':
             partial_training_set = partial_training_set.to_numpy()
             partial_response = response.to_numpy()
 
-            losses[j] = lin_reg.fit(partial_training_set, response)._loss(test_x, test_y)
+            losses[j] = lin_reg.fit(partial_training_set, partial_response)._loss(test_x, test_y)
 
         loss_per_p[i] = losses.mean()
         loss_std_per_p[i] = losses.std()
