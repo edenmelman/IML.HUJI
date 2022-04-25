@@ -101,11 +101,3 @@ class LinearRegression (BaseEstimator):
         """
         y_pred = self._predict(X)
         return mean_square_error(y, self._predict(X))
-
-if __name__ == '__main__':
-    lin_reg = LinearRegression(include_intercept=False)
-    X = np.array([[2, 4, 5], [7, 8, 9], [1, 2, 3], [2, 4, 6]])
-    y = np.array([25, 50, 14, 28])
-    lin_reg.fit(X, y)
-    print(lin_reg.predict(X))
-    print(lin_reg._loss(X, y))

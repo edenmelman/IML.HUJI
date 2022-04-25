@@ -4,6 +4,7 @@ import numpy as np
 from numpy.linalg import det, inv
 
 
+
 class LDA(BaseEstimator):
     """
     Linear Discriminant Analysis (LDA) classifier

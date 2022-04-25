@@ -16,7 +16,6 @@ def mean_square_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     -------
     MSE of given predictions
     """
-
     return ((y_true - y_pred)**2).mean()
 
 
@@ -74,7 +73,3 @@ def cross_entropy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     Cross entropy of given predictions
     """
     raise NotImplementedError()
-
-
-if __name__ == '__main__':
-    print(mean_square_error(np.array([3, -0.5, 2, 7]), np.array([2.5, 0.0, 2, 8])))

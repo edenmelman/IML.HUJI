@@ -93,18 +93,3 @@ class PolynomialFitting(BaseEstimator):
             Vandermonde matrix of given samples up to degree k
         """
         return np.vander(X, increasing=True, N=self._k+1)
-
-
-if __name__ == '__main__':
-    x = [1,2,3,4,5,6]
-    y=[]
-    for i in x:
-        y.append(i**2 + 2*(i**3) + 4*(i**4))
-    print(y)
-    poli = PolynomialFitting(4)
-    poli.fit(x, y)
-
-    print(poli.weights_)
-    print(poli.predict(x))
-
-

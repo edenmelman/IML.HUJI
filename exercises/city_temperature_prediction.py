@@ -56,7 +56,7 @@ if __name__ == '__main__':
     israel_month_temp_std = israel_subset.groupby(['Month']).std()
     israel_month_temp_std = israel_month_temp_std.reset_index()
     fig_2 = px.bar(israel_month_temp_std, x='Month', y='Temp')
-    fig_2.update_layout(title='Temperature STD per Month')
+    fig_2.update_layout(title='Temperature STD per Month', yaxis_title = 'Temp STD')
     fig_2.show()
 
     # Question 3 - Exploring differences between countries
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     temp_per_country_month = temp_per_country_month.reset_index()
     fig_3 = px.line(temp_per_country_month, x="Month", y="mean",
                     color='Country', error_y='std')
-    fig_3.update_layout(title="Montly Avarage Temprature per Country")
+    fig_3.update_layout(title="Montly Avarage Temprature per Country", yaxis_title = 'Mean Temp')
     fig_3.show()
 
     # Question 4 - Fitting model for different values of `k`
