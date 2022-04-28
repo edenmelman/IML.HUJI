@@ -102,13 +102,16 @@ def compare_gaussian_classifiers():
         # load data
         X, y = load_dataset('C:/IML.HUJI/datasets/' + f)
         models = [GaussianNaiveBayes(), LDA()]
+
         symbols = np.array(["circle-open-dot", "star-diamond-open-dot",
                             "triangle-up-open-dot"])
+
         # Fit models and predict over training set
         fig = make_subplots(rows=1, cols=2,
-                            subplot_titles=["GNB", "LDA"],
+                            subplot_titles=["plot1", "plot2"],
                             horizontal_spacing=0.01,
                             vertical_spacing=.03)
+
         for i, m in enumerate(models):
             y_pred = m.fit(X, y).predict(X)
             fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1],

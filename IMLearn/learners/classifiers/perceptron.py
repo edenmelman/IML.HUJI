@@ -88,7 +88,7 @@ class Perceptron(BaseEstimator):
                     self.fitted_ = True
                     self.callback_(self, sample, response)
                     break
-            else:
+            else:  # all samples were tagged correctly
                 self.fitted_ = True
                 break
         self.fitted_ = True
