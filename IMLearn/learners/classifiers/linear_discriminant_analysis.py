@@ -4,7 +4,6 @@ import numpy as np
 from numpy.linalg import det, inv
 
 
-
 class LDA(BaseEstimator):
     """
     Linear Discriminant Analysis (LDA) classifier
@@ -26,6 +25,7 @@ class LDA(BaseEstimator):
     self.pi_: np.ndarray of shape (n_classes)
         The estimated class probabilities. To be set in `GaussianNaiveBayes.fit`
     """
+
     def __init__(self):
         """
         Instantiate an LDA classifier
@@ -47,7 +47,29 @@ class LDA(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        n_samples = X.shape[0]
+        n_features = X.shape[1]
+        self.classes_ = np.unique(y)
+        n_classes = len(self.classes_)
+
+        self.pi_ = np.zeros((n_classes,))
+        self.mu_ = np.zeros((n_classes, n_features))
+
+        for (k, label) in enumerate(self.classes_):
+            n_k = np.count_nonzero(y == label)
+            label_inds = np.array(np.where(y == label)).flatten()
+            labeled_samples_sum = np.sum(X[label_inds, :], axis=0)
+            self.pi_[k] = n_k / n_samples
+            self.mu_[k] = labeled_samples_sum / n_k
+
+        self.cov_ = np.zeros((n_features, n_features))
+        for (i, x) in enumerate(X):
+            y_label_ind = np.where(self.classes_ == y[i])[0]
+            y_mu = self.mu_[y_label_ind, :]
+            self.cov_ += np.outer(x - y_mu, x - y_mu)
+        self.cov_ = self.cov_ / (n_samples - n_classes)
+        self._cov_inv = inv(self.cov_)
+        self.fitted_ = True
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -63,7 +85,10 @@ class LDA(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        max_k_per_sample = self.likelihood(X).argmax(1)
+        k_to_label = lambda k: self.classes_[k]
+        return k_to_label(max_k_per_sample)
+
 
     def likelihood(self, X: np.ndarray) -> np.ndarray:
         """
@@ -81,9 +106,65 @@ class LDA(BaseEstimator):
 
         """
         if not self.fitted_:
-            raise ValueError("Estimator must first be fitted before calling `likelihood` function")
+            raise ValueError(
+                "Estimator must first be fitted before calling `likelihood` function")
 
-        raise NotImplementedError()
+        # n_samples = X.shape[0]
+        # n_classes = self.classes_.shape[0]
+        # likelihoods = np.zeros((n_samples, n_classes))
+        #
+        # for k in range(n_classes):
+        #     mu_k = self.mu_[k, :]
+        #     a_k = self._cov_inv @ mu_k
+        #     b_k = np.log(self.pi_[k]) - 0.5 * (np.dot(mu_k, np.dot(self._cov_inv, mu_k)))
+        #     likelihoods[:, k] = np.transpose(a_k) @ X + b_k
+
+
+
+
+        # likelihoods = np.zeros((X.shape[0], self.classes_.shape[0]))
+        # for (i, x) in enumerate(X):
+        #     for (k, label) in enumerate(self.classes_):
+        #         a_k = np.dot(self._cov_inv, self.mu_[k, :])
+        #         b_k = np.log(self.pi_[k]) - 1/2* np.dot(self.mu_[k,:], np.dot(self._cov_inv,self.mu_[k,:]))
+        #         likelihoods[i][k] = np.dot(np.transpose(a_k), x) + b_k
+        # return likelihoods
+
+
+
+
+
+
+        # for i in range(n_samples):
+        #     x_i = X[i, :]
+        #     for k in range(n_classes):
+        #         mu_k = self.mu_[k, :]
+        #         pi_k = self.pi_[k]
+        #         likelihoods[i][k] = np.log(pi_k) + np.dot(
+        #             np.transpose(x_i),
+        #             np.dot(self._cov_inv, mu_k)) - 1 / 2 * np.dot(
+        #             np.transpose(mu_k), np.dot(self._cov_inv, mu_k))
+        # return likelihoods
+
+        n_samples = X.shape[0]
+        n_classes = self.classes_.shape[0]
+        likelihoods = np.zeros((n_samples, n_classes))
+        for k in range(n_classes):
+            mu_k = self.mu_[k, :]
+            mahalanobis = np.einsum("bi,ij,bj->b", X - mu_k,
+                                    self._cov_inv, X - mu_k)
+            col = np.exp(-0.5 * mahalanobis) / np.sqrt((2 * np.pi) ** X.shape[1] ** det(self.cov_))
+            col = col * self.pi_[k]
+            likelihoods[:, k] = col
+
+
+
+            #
+            # col = np.dot(X-mu_k, np.dot(self._cov_inv, X-mu_k)) * (-1/2)
+            # col = np.exp(col) * self.pi_[k]
+            # likelihoods[:, k] = col
+        return likelihoods
+
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -102,5 +183,7 @@ class LDA(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        from ...metrics import misclassification_error
-        raise NotImplementedError()
+
+        from IMLearn.metrics import misclassification_error
+        y_pred = self.predict(X)  # TODO change to predict with under?
+        return misclassification_error(y, y_pred)
