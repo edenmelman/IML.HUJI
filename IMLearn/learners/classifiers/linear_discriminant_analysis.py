@@ -140,5 +140,5 @@ class LDA(BaseEstimator):
         """
 
         from IMLearn.metrics import misclassification_error
-        y_pred = self.predict(X)  # TODO change to predict with under?
+        y_pred = self.predict(X)
         return misclassification_error(y, y_pred)

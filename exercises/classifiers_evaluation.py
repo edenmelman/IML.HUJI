@@ -51,7 +51,6 @@ def run_perceptron():
             losses.append(fit.loss(X, y))
 
         Perceptron(callback=extract_loss).fit(X, y)
-        #TODO remove inckude intercept
 
         # Plot figure of loss as function of fitting iteration
         fig = go.Figure(
@@ -103,7 +102,8 @@ def compare_gaussian_classifiers():
         # load data
         X, y = load_dataset('C:/IML.HUJI/datasets/' + f)
         models = [GaussianNaiveBayes(), LDA()]
-
+        symbols = np.array(["circle-open-dot", "star-diamond-open-dot",
+                            "triangle-up-open-dot"])
         # Fit models and predict over training set
         fig = make_subplots(rows=1, cols=2,
                             subplot_titles=["GNB", "LDA"],
@@ -113,7 +113,7 @@ def compare_gaussian_classifiers():
             y_pred = m.fit(X, y).predict(X)
             fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1],
                                      mode="markers", showlegend=False,
-                                     marker=dict(color=y_pred, symbol=y,
+                                     marker=dict(color=y_pred, symbol=symbols[y],
                                                  size=10,
                                                  line=dict(color="black", width=1))), row=1,
                           col=i + 1)

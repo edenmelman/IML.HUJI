@@ -61,7 +61,6 @@ class GaussianNaiveBayes(BaseEstimator):
                 self.mu_[k][j] = labeled_samples_sum / n_k
                 self.vars_[k][j] = np.sum((labeled_sample_j_feature -
                                            self.mu_[k][j]) ** 2) / (n_k -1)
-                # TODO what is the unbaised version here?
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -103,18 +102,6 @@ class GaussianNaiveBayes(BaseEstimator):
         n_samples = X.shape[0]
         n_classes = self.classes_.shape[0]
         likelihoods = np.zeros((n_samples, n_classes))
-
-        # for i in range(n_samples):
-        #     for k in range(n_classes):
-        #         mu_k = self.mu_[k, :]
-        #         pi_k = self.pi_[k]
-        #         sigma_k = self.vars_[k, :]
-        #         x_i = X[i, :]
-        #         j_dependent = -(x_i - mu_k ** 2) / (
-        #                 2 * (sigma_k ** 2)) - np.log(
-        #             sigma_k * np.square(2 * np.pi))
-        #         likelihoods[i][k] = j_dependent.sum() + np.log(pi_k)
-
         for k in range(n_classes):
             cov = np.diag(self.vars_[k, :])
             mu_k = self.mu_[k, :]
@@ -123,11 +110,6 @@ class GaussianNaiveBayes(BaseEstimator):
             col = np.exp(-0.5 * mahalanobis) / np.sqrt((2 * np.pi) ** X.shape[1] * np.linalg.det(cov))
             col = col * self.pi_[k]
             likelihoods[:, k] = col
-
-
-
-
-
         return likelihoods
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -147,7 +129,6 @@ class GaussianNaiveBayes(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-
         from IMLearn.metrics import misclassification_error
         y_pred = self.predict(X)
         return misclassification_error(y, y_pred)
