@@ -120,7 +120,7 @@ class GaussianNaiveBayes(BaseEstimator):
             mu_k = self.mu_[k, :]
             mahalanobis = np.einsum("bi,ij,bj->b", X - mu_k,
                                     np.linalg.inv(cov), X - mu_k)
-            col = np.exp(-0.5 * mahalanobis) / np.sqrt((2 * np.pi) ** X.shape[1] ** np.linalg.det(cov))
+            col = np.exp(-0.5 * mahalanobis) / np.sqrt((2 * np.pi) ** X.shape[1] * np.linalg.det(cov))
             col = col * self.pi_[k]
             likelihoods[:, k] = col
 
