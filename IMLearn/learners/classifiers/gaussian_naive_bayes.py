@@ -1,6 +1,8 @@
 from typing import NoReturn
-from ...base import BaseEstimator
+
 import numpy as np
+
+from IMLearn import BaseEstimator
 
 
 class GaussianNaiveBayes(BaseEstimator):
@@ -132,4 +134,3 @@ class GaussianNaiveBayes(BaseEstimator):
         from IMLearn.metrics import misclassification_error
         y_pred = self.predict(X)
         return misclassification_error(y, y_pred)
-
