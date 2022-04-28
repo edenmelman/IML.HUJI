@@ -51,6 +51,7 @@ def run_perceptron():
             losses.append(fit.loss(X, y))
 
         Perceptron(callback=extract_loss).fit(X, y)
+        #TODO remove inckude intercept
 
         # Plot figure of loss as function of fitting iteration
         fig = go.Figure(
@@ -113,7 +114,8 @@ def compare_gaussian_classifiers():
             fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1],
                                      mode="markers", showlegend=False,
                                      marker=dict(color=y_pred, symbol=y,
-                                                 size=10)), row=1,
+                                                 size=10,
+                                                 line=dict(color="black", width=1))), row=1,
                           col=i + 1)
 
             fig.add_trace(
@@ -136,7 +138,8 @@ def compare_gaussian_classifiers():
         fig.update_layout(margin=dict(t=100), showlegend=False,
                           title=rf"$\textbf{{Prediction of Classifiers - {f} Dataset}}$")
         fig.show()
-
+        # TODO redactor code change models to dictironary for i, (k, v) in enumerate(example_dict.items())
+        #     print(i, k, v)
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
@@ -155,5 +158,5 @@ def compare_gaussian_classifiers():
 
 if __name__ == '__main__':
     np.random.seed(0)
-    # run_perceptron()
+    run_perceptron()
     compare_gaussian_classifiers()
