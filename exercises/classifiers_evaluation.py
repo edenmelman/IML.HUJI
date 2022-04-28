@@ -83,9 +83,9 @@ def get_ellipse(mu: np.ndarray, cov: np.ndarray):
         np.pi / 2 if cov[0, 0] < cov[1, 1] else 0)
     t = np.linspace(0, 2 * pi, 100)
     xs = (l1 * np.cos(theta) * np.cos(t)) - (
-                l2 * np.sin(theta) * np.sin(t))
+            l2 * np.sin(theta) * np.sin(t))
     ys = (l1 * np.sin(theta) * np.cos(t)) + (
-                l2 * np.cos(theta) * np.sin(t))
+            l2 * np.cos(theta) * np.sin(t))
 
     return go.Scatter(x=mu[0] + xs, y=mu[1] + ys, mode="lines",
                       marker_color="black")
@@ -101,62 +101,57 @@ def compare_gaussian_classifiers():
 
         # load data
         X, y = load_dataset('C:/IML.HUJI/datasets/' + f)
-        models = [GaussianNaiveBayes(), LDA()]
+
+        # Fit models and predict over training set
+        models = {'GNB': GaussianNaiveBayes().fit(X, y),
+                  'LDA': LDA().fit(X, y)}
 
         symbols = np.array(["circle-open-dot", "star-diamond-open-dot",
                             "triangle-up-open-dot"])
+        colors = np.array(["purple", "green", "orange"])
 
-        # Fit models and predict over training set
+        # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
+        # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
+        # Create subplots
         fig = make_subplots(rows=1, cols=2,
                             subplot_titles=["plot1", "plot2"],
                             horizontal_spacing=0.01,
                             vertical_spacing=.03)
 
-        for i, m in enumerate(models):
-            y_pred = m.fit(X, y).predict(X)
+        for i, (m_name, m) in enumerate(models.items()):
+            y_pred = m.predict(X)
+            # Add traces for data-points setting symbols and colors
             fig.add_trace(go.Scatter(x=X[:, 0], y=X[:, 1],
                                      mode="markers", showlegend=False,
-                                     marker=dict(color=y_pred, symbol=symbols[y],
-                                                 size=10,
-                                                 line=dict(color="black", width=1))), row=1,
+                                     marker=dict(color=colors[y_pred],
+                                                 symbol=symbols[y],
+                                                 size=12,
+                                                 line=dict(
+                                                     color="black",
+                                                     width=1))), row=1,
                           col=i + 1)
 
+            # Add `X` dots specifying fitted Gaussians' means
             fig.add_trace(
                 go.Scatter(mode="markers", x=m.mu_[:, 0], y=m.mu_[:, 1],
-                           marker=dict(symbol='x', color='black')),
+                           marker=dict(symbol='x', color='black', size=12)),
                 row=1, col=i + 1)
-
-            model_name = 'GNB' if i == 0 else 'LDA'
             fig.layout.annotations[i].update(
-                text=f"{model_name},accuracy:{accuracy(y, y_pred)}")
+                text=f"{m_name},accuracy:{accuracy(y, y_pred)}")
 
+            # Add ellipses depicting the covariances of the fitted Gaussians
             for k in range(m.classes_.shape[0]):
-                if i == 0:
+                if m_name == 'GNB':
                     cov = np.diag(m.vars_[k, :])
                 else:
                     cov = m.cov_
                 fig.add_trace(get_ellipse(m.mu_[k, :], cov), row=1,
-                              col=i + 1, )
+                              col=i + 1)
 
         fig.update_layout(margin=dict(t=100), showlegend=False,
                           title=rf"$\textbf{{Prediction of Classifiers - {f} Dataset}}$")
         fig.show()
-        # TODO redactor code change models to dictironary for i, (k, v) in enumerate(example_dict.items())
-        #     print(i, k, v)
-        # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
-        # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
-        # Create subplots
-        from IMLearn.metrics import accuracy
-        # raise NotImplementedError()
 
-        # Add traces for data-points setting symbols and colors
-        # raise NotImplementedError()
-
-        # Add `X` dots specifying fitted Gaussians' means
-        # raise NotImplementedError()
-
-        # Add ellipses depicting the covariances of the fitted Gaussians
-        # raise NotImplementedError()
 
 
 if __name__ == '__main__':
