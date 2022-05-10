@@ -59,6 +59,7 @@ class DecisionStump(BaseEstimator):
         self.j_ = cur_feature
         self.threshold_ = cur_thr
 
+
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
         Predict responses for given samples using fitted estimator
@@ -117,16 +118,32 @@ class DecisionStump(BaseEstimator):
         which equal to or above the threshold are predicted as `sign`
         """
         from IMLearn.metrics import misclassification_error
-        cur_thr = 0
-        cur_thr_err = values.shape[0] + 1
-        for val in np.unique(values):
-            y_pred = np.where(values < val, -sign, sign)
-            #potential_err = misclassification_error(labels, y_pred, normalize=False)
-            potential_err = self._weighted_misclassification_error(labels, y_pred)
-            if potential_err < cur_thr_err:
-                cur_thr = val
-                cur_thr_err = potential_err
-        return cur_thr, cur_thr_err
+        p = values.argsort()
+        values = values[p]
+        labels = labels[p]
+        best_thr = values[0]
+        cur_thr_err = self._weighted_misclassification_error(labels, np.full(shape=(values.shape[0],), fill_value=sign))
+        best_thr_err = cur_thr_err
+        for i, value in enumerate(values):
+            if i > 0:
+                cur_thr_err -= (labels[i-1] * (-sign))
+                if cur_thr_err < best_thr_err:
+                    best_thr_err = cur_thr_err
+                    best_thr = value
+        return best_thr, best_thr_err
+
+
+        #
+        # cur_thr = 0
+        # cur_thr_err = values.shape[0] + 1
+        # for val in np.unique(values):
+        #     y_pred = np.where(values < val, -sign, sign)
+        #     #potential_err = misclassification_error(labels, y_pred, normalize=False)
+        #     potential_err = self._weighted_misclassification_error(labels, y_pred)
+        #     if potential_err < cur_thr_err:
+        #         cur_thr = val
+        #         cur_thr_err = potential_err
+        # return cur_thr, cur_thr_err
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

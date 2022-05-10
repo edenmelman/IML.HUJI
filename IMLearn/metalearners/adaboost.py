@@ -140,5 +140,4 @@ class AdaBoost(BaseEstimator):
         """
         from IMLearn.metrics import misclassification_error
         y_pred = self.partial_predict(X, T)
-        return misclassification_error(y, y_pred, normalize=False)
-    #TODO think if should be changed to True
+        return misclassification_error(y, y_pred)
