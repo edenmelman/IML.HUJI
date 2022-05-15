@@ -55,13 +55,13 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
         adaboost = pickle.load(open("save.p", "rb"))
 
     else:
-        adaboost = AdaBoost(wl=DecisionStump, iterations=250)
+        adaboost = AdaBoost(wl=DecisionStump, iterations=n_learners)
         adaboost.fit(train_X, train_y)
         pickle.dump(adaboost, open("save.p", "wb"))
 
-    train_losses = np.zeros((250,))
-    test_losses = np.zeros((250,))
-    n_learners_for_predict = np.arange(1, 251)
+    train_losses = np.zeros((n_learners,))
+    test_losses = np.zeros((n_learners,))
+    n_learners_for_predict = np.arange(1, n_learners+1)
     for i in n_learners_for_predict:
         train_losses[i-1] = adaboost.partial_loss(train_X, train_y, i)
         test_losses[i-1] = adaboost.partial_loss(test_X, test_y, i)
@@ -72,9 +72,10 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
         go.Scatter(x=n_learners_for_predict, y=test_losses,
                    mode='markers + lines',
                    name=r'$Test Loss$')]).update_layout(
-        title="train and test errors as function of learners used for prediction").show()
+        title="Train and Test Errors as Function of Number of Learners Used for prediction").show()
 
     # Question 2: Plotting decision surfaces
+    #TODO change to test
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0),
                      np.r_[train_X, test_X].max(axis=0)]).T + np.array(
@@ -102,14 +103,16 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
             rows=(i // 2) + 1, cols=(i % 2) + 1)
 
     fig_1.update_layout(
-        title=rf"$\textbf{{(2)}}$", ) \
+        title="Predictions of the ensemble up to different sizes:", ) \
         .update_xaxes(visible=False).update_yaxes(visible=False)
     fig_1.show()
 
     # Question 3: Decision surface of best performing ensemble
+    # TODO change the 250 to the minimal test error
     from IMLearn.metrics.loss_functions import accuracy
+    best_k = np.argmin(test_losses) + 1
     fig_2 = go.Figure(data=[
-        decision_surface(lambda X: adaboost.partial_predict(X, 250),
+        decision_surface(lambda X: adaboost.partial_predict(X, best_k),
                          lims[0], lims[1], showscale=False),
         go.Scatter(x=test_X[:, 0], y=test_X[:, 1],
                    mode="markers",
@@ -123,14 +126,14 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
                                    width=1)))
     ])
     fig_2.update_layout(
-        title=f"Ensamble Size: 250 . Accuracy: {accuracy(test_y, adaboost.predict(test_X))}")
+        title=f"Best Performing Ensamble Size: {best_k} . Accuracy: {accuracy(test_y, adaboost.predict(test_X))}")
     fig_2.show()
 
     # Question 4: Decision surface with weighted samples
 
     normalized_weights = (adaboost.D_ / np.max(adaboost.D_)) * 5
     fig_3 = go.Figure(data=[
-        decision_surface(lambda X: adaboost.partial_predict(X, 250),
+        decision_surface(lambda X: adaboost.partial_predict(X, n_learners),
                          lims[0], lims[1], showscale=False),
         go.Scatter(x=train_X[:, 0], y=train_X[:, 1],
                    mode="markers",

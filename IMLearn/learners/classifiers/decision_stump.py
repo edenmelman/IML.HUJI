@@ -50,7 +50,7 @@ class DecisionStump(BaseEstimator):
             for sign in signs:
                 potential_thr, potential_err = self._find_threshold(
                     X[:, j], y, sign)
-                if potential_err < cur_err:
+                if potential_err <= cur_err:
                     cur_feature = j
                     cur_sign = sign
                     cur_thr = potential_thr
@@ -117,33 +117,21 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        from IMLearn.metrics import misclassification_error
         p = values.argsort()
         values = values[p]
         labels = labels[p]
-        best_thr = values[0]
+        best_thr = np.NINF
         cur_thr_err = self._weighted_misclassification_error(labels, np.full(shape=(values.shape[0],), fill_value=sign))
         best_thr_err = cur_thr_err
-        for i, value in enumerate(values):
-            if i > 0:
-                cur_thr_err -= (labels[i-1] * (-sign))
-                if cur_thr_err < best_thr_err:
-                    best_thr_err = cur_thr_err
-                    best_thr = value
+        for i in range(1, values.shape[0]):
+            cur_thr_err -= (labels[i-1] * (-sign))
+            if values[i-1] == values[i]: #  if the previous value equals current value, cur value should not be the threshold.
+                continue
+            if cur_thr_err < best_thr_err:
+                best_thr_err = cur_thr_err
+                best_thr = values[i]
         return best_thr, best_thr_err
 
-
-        #
-        # cur_thr = 0
-        # cur_thr_err = values.shape[0] + 1
-        # for val in np.unique(values):
-        #     y_pred = np.where(values < val, -sign, sign)
-        #     #potential_err = misclassification_error(labels, y_pred, normalize=False)
-        #     potential_err = self._weighted_misclassification_error(labels, y_pred)
-        #     if potential_err < cur_thr_err:
-        #         cur_thr = val
-        #         cur_thr_err = potential_err
-        # return cur_thr, cur_thr_err
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -164,7 +152,6 @@ class DecisionStump(BaseEstimator):
         """
         from IMLearn.metrics import misclassification_error
         y_pred = self.predict(X)
-        #return misclassification_error(y, y_pred, normalize=False)
         return self._weighted_misclassification_error(y, y_pred)
 
 
