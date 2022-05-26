@@ -130,7 +130,8 @@ class DecisionStump(BaseEstimator):
             if cur_thr_err < best_thr_err:
                 best_thr_err = cur_thr_err
                 best_thr = values[i]
-        return best_thr, best_thr_err
+        total_sum = np.sum(np.abs(labels))
+        return best_thr, best_thr_err/total_sum
 
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
@@ -159,20 +160,3 @@ class DecisionStump(BaseEstimator):
         true_pred_match = np.array(np.sign(weighted_y_true)==y_pred)
         mismatch_ind = np.where(true_pred_match == False)[0]
         return np.sum(np.absolute(weighted_y_true[mismatch_ind]))
-
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    stump = DecisionStump()
-    a = np.array(
-        [[1, 1], [2, 2], [4, 0], [5, 1], [6, 3], [7, 4], [8, 5], [9, 6],
-         [10, 7], [12, 8]])
-    b = np.array([-1, 1, -1, -1, 1, 1, 1, 1, 1, 1])
-    stump.fit(a, b)
-    print(stump.j_, stump.sign_, stump.threshold_)

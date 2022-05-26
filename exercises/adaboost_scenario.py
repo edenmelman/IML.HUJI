@@ -75,7 +75,6 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
         title="Train and Test Errors as Function of Number of Learners Used for prediction").show()
 
     # Question 2: Plotting decision surfaces
-    #TODO change to test
     T = [5, 50, 100, 250]
     lims = np.array([np.r_[train_X, test_X].min(axis=0),
                      np.r_[train_X, test_X].max(axis=0)]).T + np.array(
@@ -108,7 +107,6 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
     fig_1.show()
 
     # Question 3: Decision surface of best performing ensemble
-    # TODO change the 250 to the minimal test error
     from IMLearn.metrics.loss_functions import accuracy
     best_k = np.argmin(test_losses) + 1
     fig_2 = go.Figure(data=[
@@ -131,7 +129,7 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000,
 
     # Question 4: Decision surface with weighted samples
 
-    normalized_weights = (adaboost.D_ / np.max(adaboost.D_)) * 5
+    normalized_weights = (adaboost.D_ / np.max(adaboost.D_)) * 25
     fig_3 = go.Figure(data=[
         decision_surface(lambda X: adaboost.partial_predict(X, n_learners),
                          lims[0], lims[1], showscale=False),
