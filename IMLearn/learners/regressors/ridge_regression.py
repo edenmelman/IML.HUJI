@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import NoReturn
+
+from . import LinearRegression
 from ...base import BaseEstimator
 import numpy as np
 
@@ -10,6 +12,7 @@ class RidgeRegression(BaseEstimator):
 
     Solving Ridge Regression optimization problem
     """
+
 
     def __init__(self, lam: float, include_intercept: bool = True) -> RidgeRegression:
         """
@@ -42,6 +45,7 @@ class RidgeRegression(BaseEstimator):
         self.coefs_ = None
         self.include_intercept_ = include_intercept
         self.lam_ = lam
+        self.lin_reg = LinearRegression(include_intercept=False)
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
@@ -59,7 +63,18 @@ class RidgeRegression(BaseEstimator):
         -----
         Fits model with or without an intercept depending on value of `self.include_intercept_`
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.insert(X, 0, [1], axis=1)  # adding 1's col
+        lam_id = np.sqrt(self.lam_) * np.identity(X.shape[1])
+        X_lam = np.concatenate((X, lam_id), axis=0)
+        y_lam = np.append(y, np.zeros((X.shape[1],)))
+
+        if self.include_intercept_:
+            X_lam[X.shape[0]][0] = 0  # not penalizing intercept
+
+        self.lin_reg.fit(X_lam, y_lam)
+        self.coefs_ = self.lin_reg.coefs_
+
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -75,7 +90,10 @@ class RidgeRegression(BaseEstimator):
         responses : ndarray of shape (n_samples, )
             Predicted responses of given samples
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.insert(X, 0, [1], axis=1)
+
+        return self.lin_reg.predict(X)
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -94,4 +112,6 @@ class RidgeRegression(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        raise NotImplementedError()
+        if self.include_intercept_:
+            X = np.insert(X, 0, [1], axis=1)
+        return self.lin_reg.loss(X, y)
