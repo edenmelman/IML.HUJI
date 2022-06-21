@@ -3,6 +3,7 @@ from abc import ABC
 import numpy as np
 
 
+
 class BaseModule(ABC):
     """
     Base class representing a function to be optimized in a descent method algorithm
@@ -96,5 +97,4 @@ class BaseModule(ABC):
             Specifying the dimensions of the functions parameters. If ``self.weights`` is None returns `(0,)`
         """
         return self.weights.shape if self.weights is not None else (0,)
-
 

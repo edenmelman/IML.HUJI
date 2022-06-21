@@ -1,5 +1,6 @@
 import numpy as np
 from IMLearn import BaseModule
+from IMLearn.desent_methods import GradientDescent, FixedLR
 
 
 class L2(BaseModule):
@@ -33,7 +34,7 @@ class L2(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+        return np.linalg.norm(self.weights, ord=2)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -49,7 +50,8 @@ class L2(BaseModule):
         output: ndarray of shape (n_in,)
             L2 derivative with respect to self.weights at point self.weights
         """
-        raise NotImplementedError()
+        #TODO why shouldn't I devide by norm2
+        return self.weights
 
 
 class L1(BaseModule):
@@ -78,7 +80,7 @@ class L1(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+        return np.linalg.norm(self.weights, ord=1)
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -94,7 +96,7 @@ class L1(BaseModule):
         output: ndarray of shape (n_in,)
             L1 derivative with respect to self.weights at point self.weights
         """
-        raise NotImplementedError()
+        return np.sign(self.weights)
 
 
 class LogisticModule(BaseModule):
@@ -250,3 +252,11 @@ class RegularizedModule(BaseModule):
             Weights to set for module
         """
         raise NotImplementedError()
+
+
+if __name__ == '__main__':
+    l1 = L1(np.array([1, 2]))
+    gc = GradientDescent(FixedLR(0.01))
+    print(gc.fit(l1, np.zeros(2), np.zeros(2)))
+
+

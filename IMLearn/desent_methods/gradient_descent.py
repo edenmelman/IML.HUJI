@@ -12,6 +12,8 @@ def default_callback(**kwargs) -> NoReturn:
     pass
 
 
+
+
 class GradientDescent:
     """
     Gradient Descent algorithm
@@ -39,12 +41,14 @@ class GradientDescent:
         Callable function receives as input any argument relevant for the current GD iteration. Arguments
         are specified in the `GradientDescent.fit` function
     """
+
     def __init__(self,
                  learning_rate: BaseLR = FixedLR(1e-3),
                  tol: float = 1e-5,
                  max_iter: int = 1000,
                  out_type: str = "last",
-                 callback: Callable[[GradientDescent, ...], None] = default_callback):
+                 callback: Callable[
+                     [GradientDescent, ...], None] = default_callback):
         """
         Instantiate a new instance of the GradientDescent class
 
@@ -119,4 +123,28 @@ class GradientDescent:
                 Euclidean norm of w^(t)-w^(t-1)
 
         """
-        raise NotImplementedError()
+        last_x = None
+        w_sum = f.weights
+        w_avg = f.weights
+        best_w = f.weights
+        best_val = f.compute_output()
+        for t in range(self.max_iter_):
+            grad = f.compute_jacobian()  # of x^(t-1)
+            eta = self.learning_rate_.lr_step(t=t)
+            last_x, f.weights = f.weights, f.weights - (eta * grad)
+            w_sum = w_sum + f.weights
+            w_avg = w_sum / (t+2) #TODO understand this part
+            val = f.compute_output()  # of x^(t)
+            if val < best_val:
+                best_w = f.weights
+                best_val = val
+            delta = np.linalg.norm(last_x - f.weights, ord=2)
+            self.callback_(solver=self, weights=f.weights, val=val, grad=grad, t=t, eta=eta, delta=delta)
+            if delta < self.tol_:
+                break
+            # TODO should I start from 0 or 1?
+        #TODO should the weights be changed again?
+        return self._relevant_output(last=f.weights, best=best_w, avg=w_avg)
+
+    def _relevant_output(self, last, best, avg):
+        return [last, best, avg][OUTPUT_VECTOR_TYPE.index(self.out_type_)]
