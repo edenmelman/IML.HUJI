@@ -139,7 +139,7 @@ class GradientDescent:
                 best_w = f.weights
                 best_val = val
             delta = np.linalg.norm(last_x - f.weights, ord=2)
-            self.callback_(solver=self, weights=f.weights, val=val, grad=grad, t=t, eta=eta, delta=delta)
+            self.callback_(solver=self, weight=f.weights, val=val, grad=grad, t=t, eta=eta, delta=delta)
             if delta < self.tol_:
                 break
             # TODO should I start from 0 or 1?

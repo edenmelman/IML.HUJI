@@ -73,12 +73,20 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     weights: List[np.ndarray]
         Recorded parameters
     """
-    raise NotImplementedError()
+    values = []
+    weights = []
+    def recorder(solver, weight, val, grad, t, eta, delta):
+        values.append(val)
+        weights.append(weight)
+    return recorder, values, weights
 
 
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
-    raise NotImplementedError()
+    for eta in etas:
+        l1 = L1(init)
+        l2 = L2(init)
+
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
