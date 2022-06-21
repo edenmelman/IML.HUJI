@@ -51,7 +51,7 @@ def plot_descent_path(module: Type[BaseModule],
 
     from utils import decision_surface
     return go.Figure([decision_surface(predict_, xrange=xrange, yrange=yrange, density=70, showscale=False),
-                      go.Scatter(x=descent_path[:, 0], y=descent_path[:, 1], mode="markers+lines", marker_color="black")],
+                      go.Scatter(x=descent_path[:, 0], y=descent_path[:, 1], mode="markers+lines", marker=dict(color="black"))],
                      layout=go.Layout(xaxis=dict(range=xrange),
                                       yaxis=dict(range=yrange),
                                       title=f"GD Descent Path {title}"))
@@ -81,25 +81,45 @@ def get_gd_state_recorder_callback() -> Tuple[Callable[[], None], List[np.ndarra
     return recorder, values, weights
 
 
+def plot_convergence_rate(values: List[np.ndarray], title: str):
+    return go.Figure([go.Scatter(x=np.arange(len(values)),
+                                 y=values,
+                                 mode="markers+lines",
+                                 marker=dict(color="black"))],
+                     layout=go.Layout(title=f"Convergence Rate as a Function of Gradient Descent Iteration {title}", xaxis_title="Iteration", yaxis_title="Norm"))
+
+
 def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                  etas: Tuple[float] = (1, .1, .01, .001)):
     for eta in etas:
-        l1 = L1(init)
-        l2 = L2(init)
-
+        lr = FixedLR(eta)
+        for module in [L1, L2]:
+            init_model = module(init)
+            callback, values, weights = get_gd_state_recorder_callback()
+            GradientDescent(learning_rate=lr, callback=callback).fit(f=init_model, X=None, y=None)
+            plot_descent_path(module, descent_path=np.vstack(weights), title=f" | Model:{module.__name__} | Eta:{eta}").show()
+            plot_convergence_rate(values, title=f" | Model:{module.__name__} | Eta:{eta}").show()
+            #TODO instansiate model only once and just change weights to init in every iteration
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
                                     eta: float = .1,
                                     gammas: Tuple[float] = (.9, .95, .99, 1)):
     # Optimize the L1 objective using different decay-rate values of the exponentially decaying learning rate
-    raise NotImplementedError()
-
     # Plot algorithm's convergence for the different values of gamma
-    raise NotImplementedError()
-
     # Plot descent path for gamma=0.95
-    raise NotImplementedError()
+    fig = go.Figure()
+    l1 = L1(init)
+    for gamma in gammas:
+        l1.weights = init  # initialize in every iteration
+        lr = ExponentialLR(eta, gamma)
+        callback, values, weights = get_gd_state_recorder_callback()
+        GradientDescent(learning_rate=lr, callback=callback).fit(f=l1, X=None, y=None)
+        fig.add_scatter(x=np.arange(len(values)), y=values, name=f"gamma-{gamma}")
+        if gamma == 0.95:
+            plot_descent_path(module=L1, descent_path=np.vstack(weights), title=f" | Module: L1| Eta:{eta}").show()
+
+    fig.update_layout(title="Convergence Rate as a Function of Gradient Descent Iteration",xaxis_title="Iteration", yaxis_title="Norm").show()
 
 
 def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8) -> \
@@ -149,5 +169,5 @@ def fit_logistic_regression():
 if __name__ == '__main__':
     np.random.seed(0)
     compare_fixed_learning_rates()
-    compare_exponential_decay_rates()
-    fit_logistic_regression()
+    #compare_exponential_decay_rates()
+    # fit_logistic_regression()

@@ -34,7 +34,9 @@ class L2(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        return np.linalg.norm(self.weights, ord=2)
+        return (np.linalg.norm(self.weights, ord=2)) ** 2
+        #TODO should indeed be the squared?
+
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
         """
@@ -133,7 +135,8 @@ class LogisticModule(BaseModule):
         output: ndarray of shape (1,)
             Value of function at point self.weights
         """
-        raise NotImplementedError()
+
+
 
     def compute_jacobian(self, X: np.ndarray, y: np.ndarray, **kwargs) -> np.ndarray:
         """
