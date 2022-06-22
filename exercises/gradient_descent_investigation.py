@@ -155,8 +155,28 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
 
 
 def fit_logistic_regression():
+    from sklearn.metrics import roc_curve, auc
     # Load and split SA Heard Disease dataset
     X_train, y_train, X_test, y_test = load_data()
+    X_train = X_train.to_numpy()
+    X_test = X_test.to_numpy()
+    y_prob = LogisticRegression().fit(X_train, y_train).predict_proba(X_test)
+
+    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+
+    go.Figure(
+        data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines",
+                         line=dict(color="black", dash='dash'),
+                         name="Random Class Assignment"),
+              go.Scatter(x=fpr, y=tpr, mode='markers+lines',
+                         text=thresholds, name="", showlegend=False,
+                         marker = dict(size=5),
+                         hovertemplate="<b>Threshold:</b>%{text:.3f}<br>FPR: %{x:.3f}<br>TPR: %{y:.3f}")],
+        layout=go.Layout(
+            title="ROC Curve Of Fitted Model",
+            xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
+            yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$"))).show()
+
 
     # Plotting convergence rate of logistic regression over SA heart disease data
     raise NotImplementedError()
@@ -169,5 +189,5 @@ def fit_logistic_regression():
 if __name__ == '__main__':
     np.random.seed(0)
     #compare_fixed_learning_rates()
-    compare_exponential_decay_rates()
-    # fit_logistic_regression()
+    #compare_exponential_decay_rates()
+    fit_logistic_regression()

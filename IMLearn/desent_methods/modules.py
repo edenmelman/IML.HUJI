@@ -138,7 +138,7 @@ class LogisticModule(BaseModule):
         part_a = np.inner(y, np.matmul(X, self.weights))  # sum_i^m[y*<x_i,w>]
         part_b = np.sum(np.log(1 + np.exp(np.matmul(X, self.weights))))  # sum_i^m(log(1+exp(<x_i,w>))
         m = X.shape[0]
-        return (1/m)(part_b - part_a)
+        return (1/m)*(part_b - part_a)
 
 
 

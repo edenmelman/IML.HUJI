@@ -127,14 +127,14 @@ class GradientDescent:
         w_sum = f.weights
         w_avg = f.weights
         best_w = f.weights
-        best_val = f.compute_output()
+        best_val = f.compute_output(X=X, y=y)
         for t in range(self.max_iter_):
-            grad = f.compute_jacobian()  # of x^(t-1)
+            grad = f.compute_jacobian(X=X, y=y)  # of x^(t-1)
             eta = self.learning_rate_.lr_step(t=t)
             last_x, f.weights = f.weights, f.weights - (eta * grad)
             w_sum = w_sum + f.weights
             w_avg = w_sum / (t+2) #TODO understand this part
-            val = f.compute_output()  # of x^(t)
+            val = f.compute_output(X=X, y=y)  # of x^(t)
             if val < best_val:
                 best_w = f.weights
                 best_val = val
