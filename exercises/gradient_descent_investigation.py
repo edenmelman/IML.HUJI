@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from typing import Tuple, List, Callable, Type
 
+import sklearn.model_selection
+
 from IMLearn import BaseModule
 from IMLearn.desent_methods import GradientDescent, FixedLR, ExponentialLR
 from IMLearn.desent_methods.modules import L1, L2
@@ -97,9 +99,8 @@ def compare_fixed_learning_rates(init: np.ndarray = np.array([np.sqrt(2), np.e /
             init_model = module(init)
             callback, values, weights = get_gd_state_recorder_callback()
             GradientDescent(learning_rate=lr, callback=callback).fit(f=init_model, X=None, y=None)
-            plot_descent_path(module, descent_path=np.vstack(weights), title=f" | Model:{module.__name__} | Eta:{eta}").show()
-            plot_convergence_rate(values, title=f" | Model:{module.__name__} | Eta:{eta}").show()
-            #TODO instansiate model only once and just change weights to init in every iteration
+            plot_descent_path(module, descent_path=np.vstack(weights), title=f" | Module:{module.__name__} | Eta:{eta}").show()
+            plot_convergence_rate(values, title=f" | Module:{module.__name__} | Eta:{eta}").show()
 
 
 def compare_exponential_decay_rates(init: np.ndarray = np.array([np.sqrt(2), np.e / 3]),
@@ -151,18 +152,25 @@ def load_data(path: str = "../datasets/SAheart.data", train_portion: float = .8)
     """
     df = pd.read_csv(path)
     df.famhist = (df.famhist == 'Present').astype(int)
-    return split_train_test(df.drop(['chd', 'row.names'], axis=1), df.chd, train_portion)
+    return sklearn.model_selection.train_test_split(df.drop(['chd', 'row.names'], axis=1), df.chd, train_size=train_portion)
+    #return split_train_test(df.drop(['chd', 'row.names'], axis=1), df.chd, train_portion)
+    #TODO decide on the relevant split test
 
 
 def fit_logistic_regression():
     from sklearn.metrics import roc_curve, auc
     # Load and split SA Heard Disease dataset
-    X_train, y_train, X_test, y_test = load_data()
+    #X_train, y_train, X_test, y_test = load_data() my implementaion
+    X_train, X_test, y_train, y_test = load_data()  # sklearn
     X_train = X_train.to_numpy()
     X_test = X_test.to_numpy()
-    y_prob = LogisticRegression().fit(X_train, y_train).predict_proba(X_test)
+    y_train = y_train.to_numpy()
 
-    fpr, tpr, thresholds = roc_curve(y_test, y_prob)
+    # Plotting convergence rate of logistic regression over SA heart disease data
+    y_prob = LogisticRegression().fit(X_train, y_train).predict_proba(X_train)
+    # TODO align test train wtv
+
+    fpr, tpr, thresholds = roc_curve(y_train, y_prob)
 
     go.Figure(
         data=[go.Scatter(x=[0, 1], y=[0, 1], mode="lines",
@@ -177,17 +185,38 @@ def fit_logistic_regression():
             xaxis=dict(title=r"$\text{False Positive Rate (FPR)}$"),
             yaxis=dict(title=r"$\text{True Positive Rate (TPR)}$"))).show()
 
+    best_alpha = thresholds[np.argmax(tpr-fpr)]
+    test_error = LogisticRegression(alpha=best_alpha).fit(X_train,y_train).loss(X_test,y_test)
+    print(f"**Logistic** | Bast Alpha: {best_alpha} | Test Error: {test_error}")
 
-    # Plotting convergence rate of logistic regression over SA heart disease data
-    raise NotImplementedError()
+
+
 
     # Fitting l1- and l2-regularized logistic regression models, using cross-validation to specify values
     # of regularization parameter
-    raise NotImplementedError()
+    lamdas = [0.001, 0.002, 0.005, 0.01, 0.02, 0.05, 0.1]
+    from IMLearn.model_selection import cross_validate
+    from IMLearn.metrics import mean_square_error
+    from IMLearn.metrics import misclassification_error
+    for penalty in ["l1", "l2"]:
+        train_losses = np.zeros((7,))
+        validation_losses = np.zeros((7,))
+        for ind, lam in enumerate(lamdas):
+            train_losses[ind], validation_losses[ind] = cross_validate(LogisticRegression(penalty=penalty, lam=lam, alpha=0.5), X_train,
+                                                                       y_train, misclassification_error)
+        best_lam = lamdas[np.argmin(validation_losses)]
+        test_error = LogisticRegression(penalty=penalty, lam=best_lam, alpha=0.5).fit(X_train, y_train).loss(X_test, y_test)
+        print(f"**Regularized Using {penalty} penalty**| Bast Lamda: {best_lam} | Test Error: {test_error}")
+
+
+
+
+
+
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    #compare_fixed_learning_rates()
+    compare_fixed_learning_rates()
     #compare_exponential_decay_rates()
-    fit_logistic_regression()
+    #fit_logistic_regression()

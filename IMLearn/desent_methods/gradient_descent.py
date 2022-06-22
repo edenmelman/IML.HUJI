@@ -142,8 +142,8 @@ class GradientDescent:
             self.callback_(solver=self, weight=f.weights, val=val, grad=grad, t=t, eta=eta, delta=delta)
             if delta < self.tol_:
                 break
-            # TODO should I start from 0 or 1?
         #TODO should the weights be changed again?
+        #TODO how to include first sample? does it matter?
         return self._relevant_output(last=f.weights, best=best_w, avg=w_avg)
 
     def _relevant_output(self, last, best, avg):

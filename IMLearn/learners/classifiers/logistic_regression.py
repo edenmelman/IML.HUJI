@@ -1,7 +1,7 @@
 from typing import NoReturn
 import numpy as np
 from IMLearn import BaseEstimator
-from IMLearn.desent_methods import GradientDescent
+from IMLearn.desent_methods import GradientDescent, FixedLR
 from IMLearn.desent_methods.modules import LogisticModule, RegularizedModule, L1, L2
 
 
@@ -34,7 +34,7 @@ class LogisticRegression(BaseEstimator):
 
     def __init__(self,
                  include_intercept: bool = True,
-                 solver: GradientDescent = GradientDescent(),
+                 solver: GradientDescent = GradientDescent(max_iter=20000, learning_rate=FixedLR(1e-4)),
                  penalty: str = "none",
                  lam: float = 1,
                  alpha: float = .5):
@@ -97,7 +97,7 @@ class LogisticRegression(BaseEstimator):
             f = LogisticModule(initial_weights)
             # TODO there is no include intecrept in the logistic?
         else:
-            reg_model = self.supported_modules_[self.penalty_]
+            reg_model = self.supported_modules_[self.penalty_]()
             f = RegularizedModule(fidelity_module=LogisticModule(),
                                   regularization_module=reg_model,
                                   lam=self.lam_,
@@ -145,6 +145,7 @@ class LogisticRegression(BaseEstimator):
             X = np.insert(X, 0, [1], axis=1)
             # TODO check if needed
         return self._sigmoid(np.matmul(X, self.coefs_))
+
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """

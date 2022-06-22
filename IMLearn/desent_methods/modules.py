@@ -35,7 +35,6 @@ class L2(BaseModule):
             Value of function at point self.weights
         """
         return (np.linalg.norm(self.weights, ord=2)) ** 2
-        #TODO should indeed be the squared?
 
 
     def compute_jacobian(self, **kwargs) -> np.ndarray:
@@ -52,7 +51,6 @@ class L2(BaseModule):
         output: ndarray of shape (n_in,)
             L2 derivative with respect to self.weights at point self.weights
         """
-        #TODO why shouldn't I devide by norm2
         return self.weights
 
 
@@ -203,7 +201,8 @@ class RegularizedModule(BaseModule):
         self.include_intercept_ = include_intercept
 
         if weights is not None:
-            self.weights(weights)
+            self.weights = weights
+
 
     def compute_output(self, **kwargs) -> np.ndarray:
         """
